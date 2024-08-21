@@ -1,7 +1,9 @@
+import { useState } from "react";
+
 function ProductCategoryRow({ category }) {
   return (
-    <tr>//hàng trong bảng
-      <th colSpan="2"> // "th "ô tiêu đề trong hàng 'colSpan =2' ô tiêu đề này chiếm 2 cột trong bảng 
+    <tr>
+      <th colSpan="2"> 
         {category}
       </th>
     </tr>
@@ -17,17 +19,25 @@ function ProductRow({ product }) {
 
   return (
     <tr>
-      <td>{name}</td> //"td" 1 ô trong hàng của bảng
+      <td>{name}</td> 
       <td>{product.price}</td>
     </tr>
   );
 }
 
-function ProductTable({ products }) {
+function ProductTable({ products, filterText, inStockOnly }) {
   const rows = [];
   let lastCategory = null;
 
   products.forEach((product) => {
+    if (
+      product.name.toLowerCase().indexOf(
+        filterText.toLowerCase()
+      ) === -1
+    ){
+      return;
+    }
+
     if (product.category !== lastCategory) {
       rows.push(
         <ProductCategoryRow
@@ -56,12 +66,15 @@ function ProductTable({ products }) {
   );
 }
 
-function SearchBar() {
+function SearchBar({filterText, inStockOnly,onFilterTextChange,onInStockOnlyChange}) {
   return (
     <form>
-      <input type="text" placeholder="Search..." />
+      <input type="text" value={filterText} placeholder="Search..."
+      onChange={(e) => onFilterTextChange(e.target.value)} />
       <label>
-        <input type="checkbox" />
+        <input type="checkbox"
+        checked={inStockOnly}
+        onChange={(e) => onInStockOnlyChange(e.target.checked)} />
         {' '}
         Only show products in stock
       </label>
@@ -70,10 +83,18 @@ function SearchBar() {
 }
 
 function FilterableProductTable({ products }) {
+  const [filterText,setFilterText] = useState('');
+  const [inStockOnly,setInStockOnly] = useState(false);
   return (
     <div>
-      <SearchBar />
-      <ProductTable products={products} />
+      <SearchBar
+        filterText={filterText} 
+        inStockOnly={inStockOnly}
+        onFilterTextChange={setFilterText}
+        onInStockOnlyChange={setInStockOnly} />
+      <ProductTable products={products}
+        filterText={filterText}
+        inStockOnly={inStockOnly} />
     </div>
   );
 }
